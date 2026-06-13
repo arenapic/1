@@ -51,6 +51,24 @@
                     <footer>— JEREMIAH 1:5</footer>
                 </blockquote>
             </div>
+
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <div>
+                        <h3>June 2026</h3>
+                    </div>
+                </div>
+                <div class="calendar-week">
+                    <span>Sun</span>
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                </div>
+                <div id="calendarGrid" class="calendar-grid"></div>
+            </div>
         </div>
     </div>
 
@@ -81,5 +99,85 @@
         </div>
         <div class="floral-divider">❖</div>
     </div>
+    <script>
+        const eventYear = 2026;
+        const eventMonth = 5; // June is month index 5
+        const eventDay = 20;
+        const eventHour = 16;
+        const eventLocation = "Sørumsand Festivitet, 1920 Sørumsand, Norway";
+        const eventTitle = "Gabriel's Baptism";
+        const eventDescription = "Please join us for Gabriel's baptism celebration.";
+
+        function formatICSDate(year, month, day, hour, minute) {
+            const date = new Date(Date.UTC(year, month, day, hour, minute));
+            const yyyy = date.getUTCFullYear();
+            const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+            const dd = String(date.getUTCDate()).padStart(2, "0");
+            const hh = String(date.getUTCHours()).padStart(2, "0");
+            const min = String(date.getUTCMinutes()).padStart(2, "0");
+            return `${yyyy}${mm}${dd}T${hh}${min}00Z`;
+        }
+
+        function formatGoogleCalendarDate(year, month, day, hour, minute) {
+            const date = new Date(year, month, day, hour, minute);
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, "0");
+            const dd = String(date.getDate()).padStart(2, "0");
+            const hh = String(date.getHours()).padStart(2, "0");
+            const min = String(date.getMinutes()).padStart(2, "0");
+            return `${yyyy}${mm}${dd}T${hh}${min}00`;
+        }
+
+        function getGoogleCalendarUrl() {
+            const start = formatGoogleCalendarDate(eventYear, eventMonth, eventDay, eventHour, 0);
+            const end = formatGoogleCalendarDate(eventYear, eventMonth, eventDay, eventHour + 1, 0);
+            const params = new URLSearchParams({
+                action: "TEMPLATE",
+                text: eventTitle,
+                dates: `${start}/${end}`,
+                details: eventDescription,
+                location: eventLocation
+            });
+            return `https://www.google.com/calendar/render?${params.toString()}`;
+        }
+
+        function openCalendarEvent() {
+            const url = getGoogleCalendarUrl();
+            window.open(url, "_blank");
+        }
+
+        function buildCalendar() {
+            const grid = document.getElementById("calendarGrid");
+            const firstOfMonth = new Date(eventYear, eventMonth, 1);
+            const startDay = firstOfMonth.getDay();
+            const daysInMonth = new Date(eventYear, eventMonth + 1, 0).getDate();
+
+            for (let i = 0; i < startDay; i++) {
+                const emptyCell = document.createElement("div");
+                emptyCell.className = "calendar-day empty";
+                grid.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement("div");
+                dayCell.className = "calendar-day";
+                dayCell.textContent = day;
+
+                if (day === eventDay) {
+                    dayCell.classList.add("selected", "clickable");
+                    dayCell.innerHTML = `<span>${day}</span>`;
+                    dayCell.title = "Click to add this event to your calendar";
+                    dayCell.addEventListener("click", openCalendarEvent);
+                }
+
+                grid.appendChild(dayCell);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            buildCalendar();
+            document.getElementById("addCalendarButton").addEventListener("click", openCalendarEvent);
+        });
+    </script>
 </body>
 </html>
